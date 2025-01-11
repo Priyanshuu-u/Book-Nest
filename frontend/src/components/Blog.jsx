@@ -72,7 +72,7 @@ function Blog() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`{url}/blog/${id}`);
+      await axios.delete(`${url}/blog/${id}`);
       setBlogs(blogs.filter((blog) => blog._id !== id));
     } catch (error) {
       console.error("Failed to delete blog:", error);
