@@ -75,7 +75,7 @@ function Navbar() {
     if (!query) return;
 
     try {
-      const response = await fetch(`{url}/search?q=${query}`);
+      const response = await fetch(`${url}/search?q=${query}`);
       const result = await response.json();
 
       if (response.ok) {
