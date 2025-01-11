@@ -17,7 +17,7 @@ function Signup() {
       email:data.email,
       password:data.password
     }
-   await axios.post(`{url}/user/signup`,userInfo)
+   await axios.post(`${url}/user/signup`,userInfo)
     .then((res)=>{
       console.log(res.data);
       if(res.data){
