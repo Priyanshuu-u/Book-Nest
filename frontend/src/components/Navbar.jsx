@@ -11,6 +11,7 @@ function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");  // State to hold the search query
   const [searchResults, setSearchResults] = useState([]);  // State to hold search results
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);  // For dropdown visibility
+  const url = "https://book-nest-backend-7lyo.onrender.com";
 
   const element = document.documentElement;
   const navigate = useNavigate();  // Use useNavigate for navigation
@@ -74,7 +75,7 @@ function Navbar() {
     if (!query) return;
 
     try {
-      const response = await fetch(`http://localhost:4001/search?q=${query}`);
+      const response = await fetch(`{url}/search?q=${query}`);
       const result = await response.json();
 
       if (response.ok) {
