@@ -12,7 +12,7 @@ function Login() {
       email:data.email,
       password:data.password
     }
-   await axios.post(`{url}/user/login`,userInfo)
+   await axios.post(`${url}/user/login`,userInfo)
     .then((res)=>{
       console.log(res.data);
       if(res.data){
