@@ -5,7 +5,7 @@ import axios from "axios"
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Cards from './Cards';
-
+const url = "https://book-nest-backend-7lyo.onrender.com";
 function NextArrow(props) {
     const { className, style, onClick } = props;
     
@@ -50,7 +50,7 @@ function Freebook() {
   useEffect(()=>{
     const getBook=async()=>{
       try {
-      const res =  await axios.get("http://localhost:4001/book");
+      const res =  await axios.get(`{url}/book`);
       console.log(res.data.filter((data) => data.available === "Free"));
       setBook(res.data.filter((data) => data.available === "Free"));
       } catch (error) {
