@@ -11,10 +11,16 @@ import searchRoute from "./route/search.route.js";
 
 const app = express();
 const corsOptions = {
- origin: ['http://localhost:5173', 'https://book-nest-frontend-mauve.vercel.app'], // Multiple origins
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type'],
+  origin: [
+    'http://localhost:5173', 
+    'https://book-nest-frontend-mauve.vercel.app',
+    'https://book-nest-frontend.onrender.com'  // Add your Render frontend URL
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // Include all methods you need
+  credentials: true,  // Allow credentials
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']  // Include commonly used headers
 };
+
 
 app.use(cors(corsOptions));
 app.use(express.json());
