@@ -9,12 +9,12 @@ function Blog() {
   const [content, setContent] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
-
+  const url = "https://book-nest-backend-7lyo.onrender.com";
   // Fetch blogs when user is logged in or when blogs need to be reloaded
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get('http://localhost:4001/blog');
+        const response = await axios.get(`{url}/blog`);
         setBlogs(response.data);
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
@@ -33,7 +33,7 @@ function Blog() {
     }
 
     try {
-      const response = await axios.post('http://localhost:4001/blog', {
+      const response = await axios.post(url+'/blog', {
         title,
         content,
         author: authUser._id, 
@@ -56,7 +56,7 @@ function Blog() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`http://localhost:4001/blog/${editingBlog._id}`, {
+      const response = await axios.put(`{url}/blog/${editingBlog._id}`, {
         title,
         content,
       });
@@ -72,7 +72,7 @@ function Blog() {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:4001/blog/${id}`);
+      await axios.delete(`{url}/blog/${id}`);
       setBlogs(blogs.filter((blog) => blog._id !== id));
     } catch (error) {
       console.error("Failed to delete blog:", error);
