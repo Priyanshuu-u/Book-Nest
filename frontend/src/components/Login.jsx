@@ -8,31 +8,33 @@ const url = "https://book-nest-backend-7lyo.onrender.com";
 function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const onSubmit = async (data) => {
-    const userInfo={
-      email:data.email,
-      password:data.password
+    try {
+        const userInfo = {
+            email: data.email,
+            password: data.password
+        }
+        const response = await axios.post(`${url}/user/login`, userInfo);
+        
+        if (response.data) {
+            // Store user data before showing success message
+            localStorage.setItem("Users", JSON.stringify(response.data.user));
+            
+            toast.success('Successfully LoggedIn!');
+            document.getElementById('my_modal_3').close();
+            
+            // Use a single timeout
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        }
+    } catch (err) {
+        if (err.response) {
+            toast.error(err.response.data.message);
+        } else {
+            toast.error('An error occurred while logging in');
+        }
     }
-   await axios.post(`${url}/user/login`,userInfo)
-    .then((res)=>{
-      console.log(res.data);
-      if(res.data){
-        toast.success('Successfully LoggedIn!')
-        document.getElementById('my_modal_3').close()
-        setTimeout(()=>{
-          
-          window.location.reload()
-          localStorage.setItem("Users",JSON.stringify(res.data.user))
-        },3000)
-       
-      }
-     
-    }).catch((err)=>{
-     if(err.response){
-      toast.error(err.response.data.message);
-      setTimeout(()=>{},3000)
-     }
-    })
-  };
+};
   
 
   return (
