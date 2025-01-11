@@ -11,15 +11,16 @@ const SellBook = ({ authUser }) => {
   const [author, setAuthor] = useState('');
   const [comments, setComments] = useState('');
 const url = "https://book-nest-backend-7lyo.onrender.com";
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e) => {
     e.preventDefault();
 
     const userInfo = JSON.parse(localStorage.getItem('Users'));
 
     if (!userInfo) {
-      console.error('User is not logged in');
+      toast.error('User is not logged in');
       return;
     }
+    
     try {
       const response = await axios.post(
         `${url}/sell`,
@@ -32,19 +33,35 @@ const url = "https://book-nest-backend-7lyo.onrender.com";
           image,
           author,
           comments,
-          userId: authUser._id, // Sending the logged-in user's ID
+          userId: authUser._id,
         },
         {
-          withCredentials: true, // Send cookies with the request (needed for session authentication)
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
       );
+      
       console.log('Book added:', response.data);
-      toast.success('Successfully Added!')
+      toast.success('Successfully Added!');
+      // Clear the form
+      setName('');
+      setTitle('');
+      setPrice('');
+      setCategory('');
+      setAvailable('');
+      setImage('');
+      setAuthor('');
+      setComments('');
+      
     } catch (error) {
       console.error('Error selling book:', error);
-      toast.error(error)
+      // Display the actual error message from the server if available
+      const errorMessage = error.response?.data?.message || 'Error adding book. Please try again.';
+      toast.error(errorMessage);
     }
-  };
+};
 
   return (
     <div className="p-8">
