@@ -10,7 +10,7 @@ const SellBook = ({ authUser }) => {
   const [image, setImage] = useState('');
   const [author, setAuthor] = useState('');
   const [comments, setComments] = useState('');
-
+const url = "https://book-nest-backend-7lyo.onrender.com";
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -22,7 +22,7 @@ const SellBook = ({ authUser }) => {
     }
     try {
       const response = await axios.post(
-        'http://localhost:4001/sell',
+        `{url}/sell`,
         {
           name,
           title,
