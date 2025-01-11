@@ -14,7 +14,7 @@ function Blog() {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const response = await axios.get(`{url}/blog`);
+        const response = await axios.get(`${url}/blog`);
         setBlogs(response.data);
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
@@ -33,7 +33,7 @@ function Blog() {
     }
 
     try {
-      const response = await axios.post(url+'/blog', {
+      const response = await axios.post(`${url}/blog`, {
         title,
         content,
         author: authUser._id, 
@@ -56,7 +56,7 @@ function Blog() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`{url}/blog/${editingBlog._id}`, {
+      const response = await axios.put(`${url}/blog/${editingBlog._id}`, {
         title,
         content,
       });
