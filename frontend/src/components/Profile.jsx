@@ -8,7 +8,7 @@ const url = "https://book-nest-backend-7lyo.onrender.com";
   useEffect(() => {
     const fetchBooks = async () => {
         try {
-          const response = await axios.get(`{url}/book/profile`, {
+          const response = await axios.get(`${url}/book/profile`, {
             headers: {
               Authorization: `Bearer ${authUser._id}`,
             },
