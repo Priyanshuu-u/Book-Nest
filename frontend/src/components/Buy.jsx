@@ -12,7 +12,7 @@ function Buy({authUser}) {
   useEffect(() => {
     const fetchBookDetails = async () => {
       try {
-        const response = await axios.get(`{url}/buy/${id}`);
+        const response = await axios.get(`${url}/buy/${id}`);
         setItem(response.data);
       } catch (error) {
         console.error("Error fetching book details:", error);
@@ -21,7 +21,7 @@ function Buy({authUser}) {
 
     const fetchRatings = async () => {
       try {
-        const response = await axios.get(`{url}/ratings/${id}`);
+        const response = await axios.get(`${url}/ratings/${id}`);
         setRatings(response.data);
       } catch (error) {
         console.error('Error fetching ratings:', error);
@@ -52,7 +52,7 @@ function Buy({authUser}) {
 
     try {
       // Send the rating data to the backend API
-      await axios.post(`{url}/ratings/${id}`, ratingData);
+      await axios.post(`${url}/ratings/${id}`, ratingData);
 
       // Update the UI with the new rating and comment
       setRatings([...ratings, ratingData]);
