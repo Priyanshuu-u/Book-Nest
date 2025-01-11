@@ -10,13 +10,14 @@ function Signup() {
   const navigate=useNavigate()
   const from=location.state?.from?.pathname || "/";
   const { register, handleSubmit, formState: { errors } } = useForm();
+  const url = "https://book-nest-backend-7lyo.onrender.com";
   const onSubmit = async (data) =>{
     const userInfo={
       fullname:data.fullname,
       email:data.email,
       password:data.password
     }
-   await axios.post("http://localhost:4001/user/signup",userInfo)
+   await axios.post(`{url}/user/signup`,userInfo)
     .then((res)=>{
       console.log(res.data);
       if(res.data){
