@@ -1,4 +1,3 @@
-// routes/ratings.js
 import express from "express";
 import {
   addRating,
@@ -8,11 +7,21 @@ import { sellBook } from "../controller/book.controller.js";
 
 const router = express.Router();
 
-// Route to add a rating/comment
-router.post("/ratings/:id", addRating);
+// Middleware to handle errors
+const errorHandler = (fn) => async (req, res, next) => {
+  try {
+    await fn(req, res, next);
+  } catch (error) {
+    res.status(400).json({
+      message: error.message || 'An error occurred',
+      error: process.env.NODE_ENV === 'development' ? error : {}
+    });
+  }
+};
 
-// Route to get all ratings/comments for a specific book
-router.get("/ratings/:id", getRatingsByBook);
-router.post("/sell",sellBook)
+// Routes with error handling
+router.post("/ratings/:id", errorHandler(addRating));
+router.get("/ratings/:id", errorHandler(getRatingsByBook));
+router.post("/sell", errorHandler(sellBook));
 
 export default router;
