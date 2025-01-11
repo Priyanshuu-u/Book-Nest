@@ -4,11 +4,11 @@ import axios from 'axios';
 const Profile = ({ authUser }) => {
   const [books, setBooks] = useState([]);
   const [error, setError] = useState(null);
-
+const url = "https://book-nest-backend-7lyo.onrender.com";
   useEffect(() => {
     const fetchBooks = async () => {
         try {
-          const response = await axios.get('http://localhost:4001/book/profile', {
+          const response = await axios.get(`{url}/book/profile`, {
             headers: {
               Authorization: `Bearer ${authUser._id}`,
             },
