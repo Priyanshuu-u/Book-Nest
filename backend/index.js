@@ -11,7 +11,7 @@ import searchRoute from "./route/search.route.js";
 
 const app = express();
 const corsOptions = {
-  origin: 'http://localhost:5173', // Frontend URL
+  origin: 'https://book-nest-frontend.onrender.com', // Frontend URL
   credentials: true, // Allow sending cookies with requests
 };
 
