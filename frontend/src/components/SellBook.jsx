@@ -22,7 +22,7 @@ const url = "https://book-nest-backend-7lyo.onrender.com";
     }
     try {
       const response = await axios.post(
-        `{url}/sell`,
+        `${url}/sell`,
         {
           name,
           title,
