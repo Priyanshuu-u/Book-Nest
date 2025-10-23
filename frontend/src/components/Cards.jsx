@@ -2,15 +2,41 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 /**
- * Cards component
- * - Accepts props.books or props.data (keeps compatibility)
+ * Robust Cards component (keeps using daisyUI/Tailwind classes)
+ * - Detects array in many common prop names (books, data, items, list, etc.)
+ * - Accepts either an array directly or an object with .data = array (e.g., axios response)
  * - Fixed card height and image container so all cards look identical
- * - Button placed with mt-auto so it stays at the bottom
+ * - Uses daisyUI/Tailwind classes for buttons and layout
  */
 const Cards = (props) => {
-  const items = props.books || props.data || [];
+  // Try common prop names first
+  let items =
+    props.books ||
+    props.data ||
+    props.items ||
+    props.booksData ||
+    props.list ||
+    props.products ||
+    props.array ||
+    props.booksList ||
+    null;
 
-  if (!items || items.length === 0) {
+  // If parent passed an axios response or object containing { data: [...] }
+  if (!items && props && typeof props === "object") {
+    // Check if props itself is an array (e.g., <Cards {...booksArray} /> unlikely but safe)
+    if (Array.isArray(props)) {
+      items = props;
+    } else if (Array.isArray(props?.data)) {
+      items = props.data;
+    } else {
+      // Fallback: find the first array value among props values
+      const arrVal = Object.values(props).find((v) => Array.isArray(v));
+      if (arrVal) items = arrVal;
+    }
+  }
+
+  // Final graceful fallback to empty array
+  if (!items || (Array.isArray(items) && items.length === 0)) {
     return <div className="text-center p-6">No items found.</div>;
   }
 
@@ -26,7 +52,7 @@ const Cards = (props) => {
         return (
           <div
             key={id}
-            className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col h-[420px] md:h-[420px]"
+            className="card bg-base-100 shadow-md rounded-lg overflow-hidden flex flex-col h-[420px]"
           >
             {/* Image container with fixed height so images don't resize the card */}
             <div className="h-56 w-full overflow-hidden bg-gray-100">
@@ -44,7 +70,7 @@ const Cards = (props) => {
             </div>
 
             {/* Content */}
-            <div className="p-4 flex flex-col flex-1">
+            <div className="card-body p-4 flex flex-col flex-1">
               <div>
                 <h3 className="text-lg font-semibold line-clamp-2">{title}</h3>
                 <p className="text-sm text-gray-500 mt-1">{author}</p>
@@ -57,18 +83,17 @@ const Cards = (props) => {
                 <div className="flex gap-2">
                   <Link
                     to={`/book/${id}`}
-                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-md text-center transition"
+                    className="btn btn-primary flex-1 text-white"
                   >
                     View
                   </Link>
 
                   <button
                     onClick={() => {
-                      // If your app has a "get" flow, call your handler here
-                      // or navigate to a buy page
+                      // navigate to buy page (you can replace with your handler)
                       window.location.href = `/book/${id}`;
                     }}
-                    className="bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-md transition"
+                    className="btn btn-success"
                   >
                     Get Now
                   </button>
