@@ -43,13 +43,7 @@ function Cards(props) {
 
               <div className="flex gap-2">
                 {/* Keep the state-based Link you used previously */}
-                <Link
-                  to="/buy"
-                  state={{ item }}
-                  className="badge badge-outline hover:bg-pink-500 hover:text-white px-5 py-2 duration-200 cursor-pointer"
-                >
-                  Get Now!
-                </Link>
+                
 
                 {/* Also keep the id-based route if you use it */}
                 <Link
