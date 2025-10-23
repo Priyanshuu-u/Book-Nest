@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-const backendurl = "https://book-nest-backend-7lyo.onrender.com"
+const backendurl = "https://book-nest-backend-7lyo.onrender.com";
+
 /**
- * Profile dashboard:
- * - Reads logged user from localStorage (assumes key "user" with user object)
- * - Fetches /book and /blog, then filters by user id or author
- * - Shows user info, list of listed books, authored blogs and comments/ratings if available
- *
- * Adjust API endpoints or property checks below if your backend responses differ.
+ * Robust Profile dashboard:
+ * - Tries multiple localStorage/sessionStorage keys and common response shapes
+ * - Listens for storage events to update if user logs in/out in another tab
+ * - Logs what it finds so you can debug stored user shapes
  */
 const Profile = () => {
   const [user, setUser] = useState(null);
@@ -15,14 +14,79 @@ const Profile = () => {
   const [myBlogs, setMyBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Try to load user from localStorage (common pattern)
+  // Helper: try to parse JSON safely
+  const tryParse = (raw) => {
+    if (!raw) return null;
     try {
-      const stored = JSON.parse(localStorage.getItem("user"));
-      setUser(stored || null);
-    } catch (err) {
-      setUser(null);
+      return JSON.parse(raw);
+    } catch (e) {
+      return raw;
     }
+  };
+
+  // Try to extract a user object from many common storage shapes
+  const findStoredUser = () => {
+    const candidateKeys = [
+      "user",
+      "Users",        // <-- added to match your stored key
+      "authUser",
+      "currentUser",
+      "profile",
+      "loggedUser",
+      "persist:user",
+      "persist:root",
+      "auth"
+    ];
+
+    for (const key of candidateKeys) {
+      const raw = localStorage.getItem(key) || sessionStorage.getItem(key);
+      if (!raw) continue;
+      const parsed = tryParse(raw);
+      // If parsed is the actual user object
+      if (parsed && typeof parsed === "object") {
+        // Common shapes:
+        // 1) parsed is the user: { _id, fullname, email }
+        if (parsed._id || parsed.id) {
+          console.debug(`Profile: found user under key "${key}"`, parsed);
+          return parsed;
+        }
+        // 2) parsed is { user: {...} }
+        if (parsed.user && (parsed.user._id || parsed.user.id)) {
+          console.debug(`Profile: found user under key "${key}.user"`, parsed.user);
+          return parsed.user;
+        }
+        // 3) parsed is { data: { user: {...} } } or axios-like resp
+        if (parsed.data && parsed.data.user && (parsed.data.user._id || parsed.data.user.id)) {
+          console.debug(`Profile: found user under key "${key}.data.user"`, parsed.data.user);
+          return parsed.data.user;
+        }
+        // 4) nested common case: persist:root might contain auth -> user
+        if (parsed.auth && parsed.auth.user && (parsed.auth.user._id || parsed.auth.user.id)) {
+          console.debug(`Profile: found user under key "${key}.auth.user"`, parsed.auth.user);
+          return parsed.auth.user;
+        }
+      }
+    }
+
+    // Nothing found
+    console.debug("Profile: no user found in local/session storage keys:", Object.keys(localStorage));
+    return null;
+  };
+
+  // Initialize user from storage (and whenever storage changes)
+  useEffect(() => {
+    const u = findStoredUser();
+    setUser(u);
+    setLoading(false);
+
+    const onStorage = (e) => {
+      // Re-evaluate stored user when storage changes
+      const updated = findStoredUser();
+      setUser(updated);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -33,23 +97,32 @@ const Profile = () => {
       }
 
       try {
-        // 1) fetch all books then filter by userId
-        const booksResp = await axios.get(`${backendurl || ""}/book`);
+        // fetch all books then filter by userId
+        const booksResp = await axios.get(`${backendurl}/book`);
         const books = booksResp.data || [];
         const filteredBooks = books.filter(
-          (b) => (b.userId && (b.userId === user._id || b.userId === user.id))
+          (b) => {
+            const uid = user._id || user.id;
+            if (!uid) return false;
+            if (!b.userId) return false;
+            if (typeof b.userId === "object") {
+              return b.userId._id === uid || b.userId === uid;
+            }
+            return b.userId === uid;
+          }
         );
         setMyBooks(filteredBooks);
 
-        // 2) fetch all blogs and filter by author (handle author as id or populated object)
-        const blogsResp = await axios.get(`${backendurl || ""}/blog`);
+        // fetch blogs and filter by author
+        const blogsResp = await axios.get(`${backendurl}/blog`);
         const blogs = blogsResp.data || [];
         const filteredBlogs = blogs.filter((blog) => {
-          // blog.author may be an id, a populated object, or a string name
+          const uid = user._id || user.id;
+          if (!uid) return false;
           if (!blog.author) return false;
-          if (typeof blog.author === "string") return blog.author === user._id || blog.author === user.id;
+          if (typeof blog.author === "string") return blog.author === uid;
           if (typeof blog.author === "object") {
-            return blog.author._id === user._id || blog.author._id === user.id || blog.author.fullname === user.fullname;
+            return blog.author._id === uid || blog.author === uid || blog.author.fullname === user.fullname;
           }
           return false;
         });
@@ -69,6 +142,10 @@ const Profile = () => {
       <div className="p-6">
         <h2 className="text-xl font-semibold">Profile</h2>
         <p className="mt-4 text-gray-600">You are not logged in.</p>
+        <div className="mt-4 text-sm text-gray-500">
+          <p>Debug info (open console):</p>
+          <p>Look for "Profile: found user" or "Profile: no user found" messages in console.</p>
+        </div>
       </div>
     );
   }
