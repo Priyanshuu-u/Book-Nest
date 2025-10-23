@@ -1,110 +1,87 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 /**
- * Robust Cards component (keeps using daisyUI/Tailwind classes)
- * - Detects array in many common prop names (books, data, items, list, etc.)
- * - Accepts either an array directly or an object with .data = array (e.g., axios response)
- * - Fixed card height and image container so all cards look identical
- * - Uses daisyUI/Tailwind classes for buttons and layout
+ * Cards component that supports both:
+ * - Single-card usage: <Cards item={item} />
+ * - Grid usage with array:  <Cards items={books} />
+ *
+ * Keeps your original daisyUI styling, fixes image sizing with object-cover,
+ * and ensures buttons stay aligned even when titles/descriptions differ.
  */
-const Cards = (props) => {
-  // Try common prop names first
-  let items =
-    props.books ||
-    props.data ||
-    props.items ||
-    props.booksData ||
-    props.list ||
-    props.products ||
-    props.array ||
-    props.booksList ||
-    null;
+function Cards(props) {
+  const single = props.item || null;
+  const items = props.items || props.books || props.data || null;
 
-  // If parent passed an axios response or object containing { data: [...] }
-  if (!items && props && typeof props === "object") {
-    // Check if props itself is an array (e.g., <Cards {...booksArray} /> unlikely but safe)
-    if (Array.isArray(props)) {
-      items = props;
-    } else if (Array.isArray(props?.data)) {
-      items = props.data;
-    } else {
-      // Fallback: find the first array value among props values
-      const arrVal = Object.values(props).find((v) => Array.isArray(v));
-      if (arrVal) items = arrVal;
-    }
-  }
+  // Render one card (keeps your original structure & classes)
+  const renderCard = (item) => {
+    if (!item) return null;
+    return (
+      <div className="mt-4 my-4 p-3" key={item._id || item.id}>
+        <div className="card bg-base-100 shadow-xl w-92 hover:scale-105 duration-200 h-90 dark:bg-slate-900 dark:text-white dark:border flex flex-col">
+          {/* Fixed-height figure so images don't change card size */}
+          <figure className="h-48 w-full overflow-hidden">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-full h-full object-cover"
+            />
+          </figure>
 
-  // Final graceful fallback to empty array
-  if (!items || (Array.isArray(items) && items.length === 0)) {
-    return <div className="text-center p-6">No items found.</div>;
-  }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {items.map((book) => {
-        const id = book._id || book.id;
-        const title = book.title || book.name || "Untitled";
-        const author = book.author || "Unknown";
-        const price = book.price !== undefined ? book.price : book?.pricing || "N/A";
-        const imageSrc = book.image || book.thumbnail || "";
-
-        return (
-          <div
-            key={id}
-            className="card bg-base-100 shadow-md rounded-lg overflow-hidden flex flex-col h-[420px]"
-          >
-            {/* Image container with fixed height so images don't resize the card */}
-            <div className="h-56 w-full overflow-hidden bg-gray-100">
-              {imageSrc ? (
-                <img
-                  src={imageSrc}
-                  alt={title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  No image
-                </div>
-              )}
-            </div>
-
-            {/* Content */}
-            <div className="card-body p-4 flex flex-col flex-1">
-              <div>
-                <h3 className="text-lg font-semibold line-clamp-2">{title}</h3>
-                <p className="text-sm text-gray-500 mt-1">{author}</p>
+          <div className="card-body flex flex-col flex-1">
+            <h2 className="card-title">
+              {item.name}
+              <div className="badge badge-secondary px-1 py-1 w-15 ml-2">
+                {item.price} {'\u20B9'}
               </div>
+            </h2>
 
-              <div className="mt-3 text-gray-800 font-medium">₹ {price}</div>
+            <p className="line-clamp-2">{item.title}</p>
 
-              {/* Button area sticky to bottom of card */}
-              <div className="mt-auto pt-4">
-                <div className="flex gap-2">
-                  <Link
-                    to={`/book/${id}`}
-                    className="btn btn-primary flex-1 text-white"
-                  >
-                    View
-                  </Link>
+            <div className="card-actions justify-between mt-auto">
+              <div className="badge badge-outline">{item.category}</div>
 
-                  <button
-                    onClick={() => {
-                      // navigate to buy page (you can replace with your handler)
-                      window.location.href = `/book/${id}`;
-                    }}
-                    className="btn btn-success"
-                  >
-                    Get Now
-                  </button>
-                </div>
+              <div className="flex gap-2">
+                {/* Keep the state-based Link you used previously */}
+                <Link
+                  to="/buy"
+                  state={{ item }}
+                  className="badge badge-outline hover:bg-pink-500 hover:text-white px-5 py-2 duration-200 cursor-pointer"
+                >
+                  Get Now!
+                </Link>
+
+                {/* Also keep the id-based route if you use it */}
+                <Link
+                  to={`/buy/${item._id}`}
+                  className="badge badge-outline hover:bg-pink-500 hover:text-white px-5 py-2 duration-200 cursor-pointer"
+                >
+                  Get Now!
+                </Link>
               </div>
             </div>
           </div>
-        );
-      })}
-    </div>
-  );
-};
+        </div>
+      </div>
+    );
+  };
+
+  // If single item passed, render the single card
+  if (single) {
+    return renderCard(single);
+  }
+
+  // If an array is provided, render a responsive grid of cards
+  if (items && Array.isArray(items)) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {items.map((it) => renderCard(it))}
+      </div>
+    );
+  }
+
+  // No items found fallback
+  return <div className="text-center p-6">No items found.</div>;
+}
 
 export default Cards;
