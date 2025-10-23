@@ -96,12 +96,12 @@ function Buy({ authUser }) {
       setProcessing(true);
 
       // Create order on backend
-      const amount = Number(item.price) || 0;
-      const createResp = await axios.post(`${backendUrl}/create-order`, {
-        bookId: id,
-        userId: user._id,
-        amount: amount * 100 // paise
-      });
+     const amount = Number(item.price) || 0;
+const createResp = await axios.post(`${backendUrl}/create-order`, {
+  bookId: id,
+  userId: user._id,
+  amount: amount // send rupees; backend converts to paise
+});
 
       const order = createResp.data;
       if (!order || !order.id) {
