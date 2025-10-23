@@ -3,16 +3,10 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 
 /**
- * Buy page - simplified UI
- * - Removes credit-card inputs
- * - Shows book details with a single "Buy Now" button (daisyUI styling)
- * - Integrates Razorpay checkout flow by calling backend /create-order and /verify-payment
- *
- * Required backend endpoints:
- *  - POST /create-order  -> should return { id: razorpayOrderId, amount, currency, key }
- *  - POST /verify-payment -> should verify signature and return success/failure
- *
- * Make sure to set your backend to return the razorpay key or set VITE_RAZORPAY_KEY in your frontend env.
+ * Buy page - simplified UI and correct backend endpoints
+ * - Fixed: fetchBookDetails now calls /book/buy/:id (backend mounts book routes at /book)
+ * - Ratings fetch remains /ratings/:id (ratings router is mounted at '/')
+ * - Improved error logging for 404/other responses
  */
 
 const backendUrl = "https://book-nest-backend-7lyo.onrender.com";
@@ -37,20 +31,35 @@ function Buy({ authUser }) {
 
   useEffect(() => {
     const fetchBookDetails = async () => {
+      if (!id) {
+        console.warn("Buy: no id in URL params");
+        return;
+      }
       try {
-        const res = await axios.get(`${backendUrl}/buy/${id}`);
+        // NOTE: backend book routes are mounted at /book, so use /book/buy/:id
+        const res = await axios.get(`${backendUrl}/book/buy/${id}`);
         setItem(res.data);
       } catch (err) {
-        console.error("Error fetching book details:", err);
+        // Log useful diagnostic info
+        if (err.response) {
+          console.error("Error fetching book details:", err.response.status, err.response.data);
+        } else {
+          console.error("Error fetching book details:", err.message);
+        }
       }
     };
 
     const fetchRatings = async () => {
+      if (!id) return;
       try {
         const res = await axios.get(`${backendUrl}/ratings/${id}`);
         setRatings(res.data || []);
       } catch (err) {
-        console.error("Error fetching ratings:", err);
+        if (err.response) {
+          console.error("Error fetching ratings:", err.response.status, err.response.data);
+        } else {
+          console.error("Error fetching ratings:", err.message);
+        }
       }
     };
 
@@ -91,7 +100,7 @@ function Buy({ authUser }) {
       const createResp = await axios.post(`${backendUrl}/create-order`, {
         bookId: id,
         userId: user._id,
-        amount: amount * 100 // send in paise for INR
+        amount: amount * 100 // paise
       });
 
       const order = createResp.data;
@@ -110,7 +119,7 @@ function Buy({ authUser }) {
       }
 
       const options = {
-        key: order.key || import.meta.env.VITE_RAZORPAY_KEY || "", // fallback
+        key: order.key || import.meta.env.VITE_RAZORPAY_KEY || "",
         amount: order.amount || amount * 100,
         currency: order.currency || "INR",
         name: "BookNest",
@@ -120,10 +129,9 @@ function Buy({ authUser }) {
           name: user.fullname || "",
           email: user.email || ""
         },
-        theme: { color: "#F472B6" }, // pink theme
+        theme: { color: "#F472B6" },
         handler: async (response) => {
           try {
-            // Verify payment on backend
             await axios.post(`${backendUrl}/verify-payment`, {
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_order_id: response.razorpay_order_id,
@@ -132,8 +140,6 @@ function Buy({ authUser }) {
               userId: user._id
             });
             alert("Payment successful! Thank you for your purchase.");
-            // optionally redirect to success page
-            // navigate('/order-success');
           } catch (err) {
             console.error("Payment verification failed:", err);
             alert("Payment succeeded but verification failed. Contact support.");
