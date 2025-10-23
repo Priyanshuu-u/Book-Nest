@@ -24,7 +24,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
     "mongoose": "^8.7.3",
-    "razorpay": "^2.11.0"
+    "razorpay": "*"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
