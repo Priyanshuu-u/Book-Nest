@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
+const backendurl = "https://book-nest-backend-7lyo.onrender.com"
 /**
  * Profile dashboard:
  * - Reads logged user from localStorage (assumes key "user" with user object)
@@ -34,7 +34,7 @@ const Profile = () => {
 
       try {
         // 1) fetch all books then filter by userId
-        const booksResp = await axios.get(`${import.meta.env.VITE_BACKEND_URL || ""}/book`);
+        const booksResp = await axios.get(`${backendurl || ""}/book`);
         const books = booksResp.data || [];
         const filteredBooks = books.filter(
           (b) => (b.userId && (b.userId === user._id || b.userId === user.id))
@@ -42,7 +42,7 @@ const Profile = () => {
         setMyBooks(filteredBooks);
 
         // 2) fetch all blogs and filter by author (handle author as id or populated object)
-        const blogsResp = await axios.get(`${import.meta.env.VITE_BACKEND_URL || ""}/blog`);
+        const blogsResp = await axios.get(`${backendurl || ""}/blog`);
         const blogs = blogsResp.data || [];
         const filteredBlogs = blogs.filter((blog) => {
           // blog.author may be an id, a populated object, or a string name
