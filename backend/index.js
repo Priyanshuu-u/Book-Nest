@@ -7,7 +7,7 @@ import userRoute from "./route/user.route.js";
 import ratingsRouter from "./route/rating.route.js";
 import blogRoutes from "./route/blog.route.js";
 import searchRoute from "./route/search.route.js";
-
+import paymentRoute from "./route/payment.route.js";
 dotenv.config(); // load env vars early
 
 const app = express();
@@ -33,7 +33,7 @@ app.use("/user", userRoute);
 app.use("/", ratingsRouter);  // includes /sell
 app.use('/blog', blogRoutes);
 app.use('/', searchRoute);
-
+app.use('/', paymentRoute);
 // Improve visibility of unexpected errors in Render logs
 process.on('uncaughtException', (err) => {
   console.error('uncaughtException:', err);
