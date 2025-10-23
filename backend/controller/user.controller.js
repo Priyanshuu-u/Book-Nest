@@ -1,5 +1,6 @@
 import User from "../model/user.model.js";
 import bcryptjs from "bcryptjs";
+
 export const signup = async (req, res) => {
   try {
     const { fullname, email, password } = req.body;
@@ -14,15 +15,18 @@ export const signup = async (req, res) => {
       password: hashPassword,
     });
     await createdUser.save();
+
+    // Return the newly created user's id as well, matching login response shape
     res.status(201).json({
       message: "User created Successfully",
-      user: { fullname: createdUser.fullname, email: createdUser.email },
+      user: { _id: createdUser._id, fullname: createdUser.fullname, email: createdUser.email },
     });
   } catch (error) {
     console.log("Error: " + error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
