@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 const backendurl = "https://book-nest-backend-7lyo.onrender.com";
+import Navbar from "./Navbar.jsx";
+import Footer from "./Footer.jsx";
 
 /**
  * Robust Profile dashboard:
@@ -151,6 +153,8 @@ const Profile = () => {
   }
 
   return (
+    <>
+    <Navbar/>
     <div className="p-6">
       <h2 className="text-2xl font-semibold mb-4">My Dashboard</h2>
 
@@ -215,6 +219,8 @@ const Profile = () => {
         <div className="mt-3 text-gray-500">If you store comments/ratings in a dedicated endpoint, add a fetch here to show them.</div>
       </section>
     </div>
+  <Footer/>
+      </>
   );
 };
 
